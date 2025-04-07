@@ -2,14 +2,26 @@ import express from 'express';
 import cors from 'cors';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { YoutubeTranscript } from 'youtube-transcript';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI("AIzaSyAC4874Yh40xEhNmQUqbxc4yQR_L7aAuTI");
+// Initialize Gemini AI with environment variable
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-app.use(cors());
+// Configure CORS
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['chrome-extension://*'] 
+    : '*',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+}));
+
 app.use(express.json());
 
 // Function to get video ID from URL
@@ -97,23 +109,52 @@ const extractJSON = (text) => {
 app.post('/analyze-video', async (req, res) => {
   try {
     const { videoUrl } = req.body;
+    if (!videoUrl) {
+      return res.status(400).json({ 
+        error: 'Video URL is required',
+        transcript: [],
+        adSegments: []
+      });
+    }
+
     console.log('Analyzing video:', videoUrl);
     
     const videoId = getVideoId(videoUrl);
     
     if (!videoId) {
-      return res.status(400).json({ error: 'Invalid YouTube URL' });
+      return res.status(400).json({ 
+        error: 'Invalid YouTube URL',
+        transcript: [],
+        adSegments: []
+      });
     }
 
-    // Get transcript
-    const transcript = await YoutubeTranscript.fetchTranscript(videoId);
-    console.log('Raw transcript from YouTube:', transcript[0]); // Log first item as example
-    
+    // Get transcript with error handling
+    let transcript;
+    try {
+      transcript = await YoutubeTranscript.fetchTranscript(videoId);
+    } catch (error) {
+      console.error('Error fetching transcript:', error);
+      return res.status(404).json({ 
+        error: 'Could not fetch video transcript. The video might not have captions available.',
+        transcript: [],
+        adSegments: []
+      });
+    }
+
+    if (!transcript || transcript.length === 0) {
+      return res.status(404).json({ 
+        error: 'No transcript available for this video',
+        transcript: [],
+        adSegments: []
+      });
+    }
+
     // Prepare transcript for analysis
     const transcriptText = transcript.map(t => `[${t.offset}s]: ${t.text}`).join('\n');
     
     // Initialize Gemini model
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({  model: "gemini-2.0-flash"});
 
     // Analyze for ad segments with more structured prompt
     const prompt = `You are an AI trained to analyze YouTube video transcripts and identify sponsored segments or advertisements.
@@ -176,11 +217,21 @@ ${transcriptText}`;
   } catch (error) {
     console.error('Error in analyze-video:', error);
     res.status(500).json({ 
-      error: error.message,
+      error: 'An unexpected error occurred while analyzing the video',
       transcript: [],
       adSegments: []
     });
   }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ 
+    error: 'Internal Server Error',
+    transcript: [],
+    adSegments: []
+  });
 });
 
 app.listen(PORT, () => {
