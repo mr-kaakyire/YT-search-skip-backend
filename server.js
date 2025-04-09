@@ -16,10 +16,11 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 // Configure CORS
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['chrome-extension://*'] 
+    ? ['chrome-extension://macaocobdbbeebfpdgiippbpamfnlhee'] 
     : '*',
   methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type']
+  allowedHeaders: ['Content-Type'],
+  credentials: true
 }));
 
 app.use(express.json());
