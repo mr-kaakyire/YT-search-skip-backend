@@ -216,6 +216,7 @@ ${transcriptText}`;
     
     res.json(responseToSend);
   } catch (error) {
+    console.log("This is the API key:", process.env.GEMINI_API_KEY)
     console.error('Error in analyze-video:', error);
     res.status(500).json({ 
       error: 'An unexpected error occurred while analyzing the video',
