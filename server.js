@@ -18,28 +18,14 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Initialize Gemini AI with environment variable
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+app.use(cors({
+  origin: '*', // or set this to your frontend URL in prod
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 
-// Configure CORS - universal approach (all origins allowed)
-app.use((req, res, next) => {
-  // Allow all origins
-  const requestOrigin = req.headers.origin || '*';
-  
-  // Set CORS headers
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Accept, Origin, X-Requested-With, Authorization');
-  res.header('Access-Control-Max-Age', '86400'); // 24 hours
-  
-  // Handle OPTIONS method
-  if (req.method === 'OPTIONS') {
-    // Preflight request - respond immediately with 204
-    return res.status(204).end();
-  }
-  
-  // Move to next middleware
-  next();
-});
+app.options('*', cors());
 
 app.use(express.json());
 
