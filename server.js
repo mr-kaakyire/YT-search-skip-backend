@@ -7,6 +7,13 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
+// Debug logging for environment variables
+console.log('Environment check:');
+console.log('- NODE_ENV:', process.env.NODE_ENV);
+console.log('- GEMINI_API_KEY exists:', !!process.env.GEMINI_API_KEY);
+console.log('- API Key first 4 chars:', process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.substring(0, 4) : 'undefined');
+console.log('- PORT:', process.env.PORT);
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -18,10 +25,25 @@ app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? ['chrome-extension://macaocobdbbeebfpdgiippbpamfnlhee'] 
     : '*',
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type'],
   credentials: true
 }));
+
+// Additional middleware to ensure CORS headers
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'chrome-extension://macaocobdbbeebfpdgiippbpamfnlhee');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(204).send();
+  }
+  
+  next();
+});
 
 app.use(express.json());
 
@@ -108,6 +130,11 @@ const extractJSON = (text) => {
 
 // Get transcript and analyze for ads
 app.post('/analyze-video', async (req, res) => {
+  // Set CORS headers explicitly for this endpoint
+  res.header('Access-Control-Allow-Origin', 'chrome-extension://macaocobdbbeebfpdgiippbpamfnlhee');
+  res.header('Access-Control-Allow-Methods', 'POST');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+
   try {
     const { videoUrl } = req.body;
     if (!videoUrl) {
