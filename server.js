@@ -20,32 +20,39 @@ const PORT = process.env.PORT || 3000;
 // Initialize Gemini AI with environment variable
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// Configure CORS
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['chrome-extension://macaocobdbbeebfpdgiippbpamfnlhee'] 
-    : '*',
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
-  credentials: true
-}));
-
-// Additional middleware to ensure CORS headers
+// Configure CORS - universal approach (all origins allowed)
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'chrome-extension://macaocobdbbeebfpdgiippbpamfnlhee');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  res.header('Access-Control-Allow-Credentials', 'true');
+  // Allow all origins
+  const requestOrigin = req.headers.origin || '*';
   
-  // Handle preflight requests
+  // Set CORS headers
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Accept, Origin, X-Requested-With, Authorization');
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
+  
+  // Handle OPTIONS method
   if (req.method === 'OPTIONS') {
-    return res.status(204).send();
+    // Preflight request - respond immediately with 204
+    return res.status(204).end();
   }
   
+  // Move to next middleware
   next();
 });
 
 app.use(express.json());
+
+// Request logger middleware to help with debugging
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log('  Headers:', JSON.stringify({
+    origin: req.headers.origin,
+    'access-control-request-method': req.headers['access-control-request-method'],
+    'access-control-request-headers': req.headers['access-control-request-headers']
+  }));
+  next();
+});
 
 // Function to get video ID from URL
 const getVideoId = (url) => {
@@ -130,11 +137,8 @@ const extractJSON = (text) => {
 
 // Get transcript and analyze for ads
 app.post('/analyze-video', async (req, res) => {
-  // Set CORS headers explicitly for this endpoint
-  res.header('Access-Control-Allow-Origin', 'chrome-extension://macaocobdbbeebfpdgiippbpamfnlhee');
-  res.header('Access-Control-Allow-Methods', 'POST');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-
+  // Remove CORS headers from here as they're handled globally
+  
   try {
     const { videoUrl } = req.body;
     if (!videoUrl) {
