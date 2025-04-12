@@ -15,8 +15,8 @@ console.log('- API Key first 4 chars:', process.env.GEMINI_API_KEY ? process.env
 console.log('- PORT:', process.env.PORT);
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
+const PORT = process.env.PORT || 8080;
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 // Initialize Gemini AI with environment variable
 app.use(cors({
   origin: '*', // or set this to your frontend URL in prod
