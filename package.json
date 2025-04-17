@@ -15,6 +15,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.1",
     "nodemon": "^3.1.7",
-    "youtube-transcript": "^1.2.1"
+    "youtube-transcript": "^1.2.1",
+    "youtubei.js": "^13.3.0"
   }
 }

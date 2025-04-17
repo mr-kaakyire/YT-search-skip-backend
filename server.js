@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { YoutubeTranscript } from 'youtube-transcript';
+import {Innertube} from "youtubei.js"
 import dotenv from 'dotenv';
 
 // Load environment variables
@@ -29,16 +30,6 @@ app.options('*', cors());
 
 app.use(express.json());
 
-// Request logger middleware to help with debugging
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  console.log('  Headers:', JSON.stringify({
-    origin: req.headers.origin,
-    'access-control-request-method': req.headers['access-control-request-method'],
-    'access-control-request-headers': req.headers['access-control-request-headers']
-  }));
-  next();
-});
 
 // Function to get video ID from URL
 const getVideoId = (url) => {
@@ -149,16 +140,58 @@ app.post('/analyze-video', async (req, res) => {
 
     // Get transcript with error handling
     let transcript;
-    try {
-      transcript = await YoutubeTranscript.fetchTranscript(videoId);
-    } catch (error) {
-      console.error('Error fetching transcript:', error);
-      return res.status(404).json({ 
-        error: 'Could not fetch video transcript. The video might not have captions available.',
-        transcript: [],
-        adSegments: []
-      });
-    }
+    const youtube = await Innertube.create({
+      lang: 'en',
+      location: 'US',
+      retrieve_player: false,
+    });
+  
+    
+      try {
+        const info = await youtube.getInfo(videoId);
+        const transcriptData = await info.getTranscript();
+        
+        console.log('Transcript data structure:', JSON.stringify(transcriptData, null, 2).substring(0, 500) + '...');
+        
+        // Check if the expected transcript structure exists
+        if (!transcriptData?.transcript?.content?.body?.initial_segments) {
+          console.error('Unexpected transcript data structure:', transcriptData);
+          return res.status(404).json({ 
+            error: 'Transcript data has an unexpected format',
+            transcript: [],
+            adSegments: []
+          });
+        }
+        
+        console.log('First segment example:', JSON.stringify(transcriptData.transcript.content.body.initial_segments[0], null, 2));
+        
+        // Transform transcript data to match the expected format
+        try {
+          transcript = transcriptData.transcript.content.body.initial_segments.map((segment) => ({
+            text: segment.snippet.text,
+            offset: segment.start_ms / 1000 // Convert milliseconds to seconds
+          }));
+        } catch (parseError) {
+          console.error('Error parsing transcript segments:', parseError);
+          return res.status(404).json({ 
+            error: 'Error processing transcript data',
+            transcript: [],
+            adSegments: []
+          });
+        }
+        
+        console.log('Transformed transcript (first 3 items):', JSON.stringify(transcript.slice(0, 3), null, 2));
+      } catch (error) {
+        console.error('Error fetching transcript:', error);
+        return res.status(404).json({ 
+          error: 'Could not fetch video transcript. The video might not have captions available.',
+          transcript: [],
+          adSegments: []
+        });
+      }
+
+
+
 
     if (!transcript || transcript.length === 0) {
       return res.status(404).json({ 
