@@ -3,9 +3,9 @@ version: '3.8'
 services:
   backend:
     build:
-      image: backend:latest
       context: .
       dockerfile: Dockerfile
+    image: backend:latest
     ports:
       - "3000:3000"
     environment:
@@ -15,9 +15,9 @@ services:
 
   nginx:
     build:
-      image: nginx:latest
       context: ./nginx
       dockerfile: Dockerfile
+    image: nginx:latest
     ports:
       - "443:443"
     volumes:
