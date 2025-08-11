@@ -51,15 +51,11 @@ jobs:
     
     - name: Push images to Docker Hub
       run: |
-        VERSION=${{ steps.version.outputs.version }}
+        # Clean up to save space
+        docker compose push
+
         
-        # Get list of tagged images
-        TAGGED_IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep "^$DOCKERHUB_USERNAME/")
-        
-        for IMAGE in $TAGGED_IMAGES; do
-          echo "Pushing $IMAGE..."
-          docker push $IMAGE
-        done
+   
     
     - name: Clean up local images
       run: |
