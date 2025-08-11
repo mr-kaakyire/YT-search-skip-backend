@@ -98,5 +98,5 @@ jobs:
       run: |
         echo "🎉 Deployment completed successfully!"
         echo "📦 Release version: ${{ steps.version.outputs.version }}"
-        echo "🐳 Images pushed to Docker Hub under username: $DOCKER_HUB_USERNAME"
+        echo "🐳 Images pushed to Docker Hub under username: $DOCKERHUB_USERNAME"
         echo "🏷️  Tags: ${{ steps.version.outputs.version }}, latest"
