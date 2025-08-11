@@ -1,4 +1,6 @@
 node_modules/
 docs/
+./nginx/nginx-selfsigned.crt
+./nginx/nginx-selfsigned.key
 .env
 .DS_Store 

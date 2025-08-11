@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { YoutubeTranscript } from 'youtube-transcript';
 import {Innertube} from "youtubei.js"
 import dotenv from 'dotenv';
 
@@ -19,14 +18,14 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 // Initialize Gemini AI with environment variable
-app.use(cors({
-  origin: '*', // or set this to your frontend URL in prod
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
+// app.use(cors({
+//   origin: '*', // or set this to your frontend URL in prod
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+//   credentials: true
+// }));
 
-app.options('*', cors());
+// app.options('*', cors());
 
 app.use(express.json());
 
