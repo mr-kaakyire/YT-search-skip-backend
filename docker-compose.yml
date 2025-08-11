@@ -3,6 +3,7 @@ version: '3.8'
 services:
   backend:
     build:
+      image: backend:latest
       context: .
       dockerfile: Dockerfile
     ports:
@@ -14,6 +15,7 @@ services:
 
   nginx:
     build:
+      image: nginx:latest
       context: ./nginx
       dockerfile: Dockerfile
     ports:
