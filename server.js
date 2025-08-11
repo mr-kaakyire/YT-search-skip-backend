@@ -1,10 +1,8 @@
-
-import express from 'express';
-import cors from 'cors';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import {Innertube} from "youtubei.js"
-import dotenv from 'dotenv';
-
+import express from "express";
+import cors from "cors";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { Innertube } from "youtubei.js";
+import dotenv from "dotenv";
 
 // Load environment variables
 dotenv.config();
@@ -34,7 +32,6 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 // }));
 
 // app.options('*', cors());
-
 
 app.use(express.json());
 
