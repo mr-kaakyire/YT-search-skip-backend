@@ -50,13 +50,11 @@ jobs:
     - name: Build with Docker Compose
       env:
         # Pass GitHub secrets as environment variables
-        API_KEY: ${{ secrets.API_KEY }}
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         # Add other secrets as needed
       run: |
         # Build all services defined in docker-compose.yml
-        docker-compose build
+        docker compose build
         
     - name: Tag images for Docker Hub
       run: |
