@@ -25,14 +25,6 @@ jobs:
         username: ${{ env.DOCKERHUB_USERNAME }}
         password: ${{ env.DOCKERHUB_TOKEN }}
     
-    - name: Extract release version
-      id: version
-      run: |
-        # Remove 'v' prefix if present (e.g., v1.0.0 -> 1.0.0)
-        VERSION=${GITHUB_REF#refs/tags/}
-        VERSION=${VERSION#v}
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-        echo "Release version: $VERSION"
     
     - name: Create SSL certificates from secrets
       run: |
@@ -56,26 +48,6 @@ jobs:
         # Build all services defined in docker-compose.yml
         docker compose build
         
-    - name: Tag images for Docker Hub
-      run: |
-        # Get the version from the previous step
-        VERSION=${{ steps.version.outputs.version }}
-        
-        # List all images built by docker-compose
-        IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep -v "^<none>" | grep -E "^[^/]+_[^/]+")
-        
-        for IMAGE in $IMAGES; do
-          # Extract service name from image (assuming format: projectname_servicename)
-          SERVICE_NAME=$(echo $IMAGE | cut -d'_' -f2 | cut -d':' -f1)
-          
-          # Tag with version and latest
-          docker tag $IMAGE $DOCKERHUB_USERNAME/$SERVICE_NAME:$VERSION
-          docker tag $IMAGE $DOCKERHUB_USERNAME/$SERVICE_NAME:latest
-          
-          echo "Tagged $IMAGE as:"
-          echo "  - $DOCKERHUB_USERNAME/$SERVICE_NAME:$VERSION"
-          echo "  - $DOCKERHUB_USERNAME/$SERVICE_NAME:latest"
-        done
     
     - name: Push images to Docker Hub
       run: |
@@ -97,6 +69,5 @@ jobs:
     - name: Deployment Summary
       run: |
         echo "🎉 Deployment completed successfully!"
-        echo "📦 Release version: ${{ steps.version.outputs.version }}"
         echo "🐳 Images pushed to Docker Hub under username: $DOCKERHUB_USERNAME"
-        echo "🏷️  Tags: ${{ steps.version.outputs.version }}, latest"
+     
