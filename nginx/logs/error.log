@@ -1,0 +1,11 @@
+2025/08/10 19:25:54 [error] 5620#22084: *1 CreateFile() "C:\Users\ADAM\Downloads\nginx-1.29.0\nginx-1.29.0/html/favicon.ico" failed (2: The system cannot find the file specified), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost", referrer: "http://localhost/"
+2025/08/10 21:27:25 [emerg] 3652#18124: cannot load certificate "C:/mnt/c/Users/ADAM/Downloads/nginx-selfsigned.crt": BIO_new_file() failed (SSL: error:80000003:system library::No such process:calling fopen(C:/mnt/c/Users/ADAM/Downloads/nginx-selfsigned.crt, r) error:10000080:BIO routines::no such file)
+2025/08/10 21:32:44 [emerg] 23908#24024: cannot load certificate "C:\Users\ADAM\Downloads
+ginx-selfsigned.crt": BIO_new_file() failed (SSL: error:8000007B:system library::no protocol option:calling fopen(C:\Users\ADAM\Downloads
+ginx-selfsigned.crt, r) error:10080002:BIO routines::system lib)
+2025/08/10 21:35:02 [emerg] 16392#10732: cannot load certificate "C:\Users\ADAM\Downloads
+ginx-selfsigned.crt": BIO_new_file() failed (SSL: error:8000007B:system library::no protocol option:calling fopen(C:\Users\ADAM\Downloads
+ginx-selfsigned.crt, r) error:10080002:BIO routines::system lib)
+2025/08/10 21:36:52 [notice] 23880#13412: signal process started
+2025/08/10 21:50:30 [notice] 20792#22708: signal process started
+2025/08/10 21:50:30 [error] 20792#22708: OpenEvent("Global\ngx_reload_20128") failed (2: The system cannot find the file specified)
