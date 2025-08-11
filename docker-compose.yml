@@ -1,13 +1,11 @@
-version: '3.8'
-
 services:
   backend:
     build:
       context: .
       dockerfile: Dockerfile
-      args: 
-        GEMINI_API_KEY: ${GEMINI_API_KEY}
-    image: backend:latest
+      args:
+        GEMINI_API_KEY: ${GEMINI_API_KEY} # Pass the environment variable to the Docker build process
+    image: ${{ env.DOCKERHUB_USERNAME }}/backend:latest # Tag image with your Docker Hub username
     ports:
       - "3000:3000"
     environment:
@@ -19,13 +17,13 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile
-    image: nginx:latest
+    image: ${{ env.DOCKERHUB_USERNAME }}/nginx:latest # Tag image with your Docker Hub username
     ports:
       - "443:443"
     volumes:
-        - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
-        - ./nginx/ssl/nginx-selfsigned.crt:/etc/nginx/ssl/nginx-selfsigned.crt:ro
-        - ./nginx/ssl/nginx-selfsigned.key:/etc/nginx/ssl/nginx-selfsigned.key:ro
+      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl/nginx-selfsigned.crt:/etc/nginx/ssl/nginx-selfsigned.crt:ro
+      - ./nginx/ssl/nginx-selfsigned.key:/etc/nginx/ssl/nginx-selfsigned.key:ro
     depends_on:
       - backend
     networks:
